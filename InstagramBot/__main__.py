@@ -19,13 +19,14 @@ def like_new_from_tags(ap, tags_list, likes_number):
         for tag in tags_list:
             like_new_from_tag(ap, tag)
 
-      def like_new_from_tag(ap, tag):
+
+def like_new_from_tag(ap, tag):
     print(tag)
     ap.tagFeed(tag)
     i = ap.LastJson['items'][0]
     print(i)
     ap.like(i['id'])
-     
+
     time.sleep(80)
 
 
