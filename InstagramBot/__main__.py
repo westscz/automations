@@ -30,9 +30,20 @@ def like_new_from_tag(ap, tag):
     time.sleep(80)
 
 
+def comment_new_from_tag(ap, tag):
+    print(tag)
+    d = {"lomography":["Nice picture!"]}
+
+    ap.tagFeed(tag)
+    i = ap.LastJson['items'][0]
+    print(i)
+    ap.comment(i['id'], "Nice picture!")
+    time.sleep(80)
+
 def fire_cli(logins, password):
     ap = login(logins, password)
-    like_new_from_tags(ap, ["35mm", 'filmisnotdead'], 100)
+    comment_new_from_tag(ap, "lomography")
+    like_new_from_tags(ap, ["lomography", "35mm", 'filmisnotdead'], 100)
 
 
 if __name__ == '__main__':
