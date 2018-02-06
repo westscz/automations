@@ -18,13 +18,14 @@ logger.addHandler(ch)
 pp = pprint.PrettyPrinter(indent=4)
 
 
+class YamlConfig:
+    tags = None
+    comments = None
 
-
-
-class YamlConfig():
     def __init__(self):
         with open("config.yml", 'r') as ymlfile:
             self.cfg = yaml.load(ymlfile)
+        self.__dict__.update(self.cfg)
         pp.pprint(self.cfg)
 
 
@@ -99,8 +100,9 @@ def fire_cli(logins, password):
     ap = login(logins, password)
     comment_new_from_tag(ap, "lomography")
     follow_new_from_tag_author(ap, "lomography")
-    like_new_from_tags(ap, config.cfg['tags'], 156)
+    like_new_from_tags(ap, config.tags, 156)
     # get_media_from_tag(ap, "lomography")
+
 
 if __name__ == '__main__':
     fire.Fire(fire_cli)
