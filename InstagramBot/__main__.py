@@ -89,15 +89,20 @@ class InstagramBot(object):
         url = "https://instagram.com/p/{}".format(media_id)
         logger.info("{fn}: {url}".format(fn=full_name, url=url))
 
+    def add_photo(self, media_path, caption):
+        self.IAPI.uploadPhoto(media_path, caption)
+
 
 def fire_cli(user_login, user_password):
     config = YamlConfig()
 
     ibot = InstagramBot()
     ibot.login(user_login, user_password)
-    ibot.comment_new_from_tag("lomography")
-    ibot.follow_new_from_tag_author("lomography")
-    ibot.like_new_from_tags(config.tags, 156)
+    ibot.add_photo("/media/2017-08-30_100NORIT/86410001.JPG",
+                   "Szczyrk #lomography #120mm #filmisnotdead")
+    # ibot.comment_new_from_tag("lomography")
+    # ibot.follow_new_from_tag_author("lomography")
+    # ibot.like_new_from_tags(config.tags, 156)
     # get_media_from_tag(ap, "lomography")
 
 
