@@ -1,0 +1,4 @@
+.RECIPEPREFIX +=
+
+black:
+    black *.py
