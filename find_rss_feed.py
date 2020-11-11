@@ -60,15 +60,7 @@ def create_template():
 
 
 def add_subelement(doc, feed):
-    ET.SubElement(
-        doc,
-        "outline",
-        type="rss",
-        text=feed.title,
-        title=feed.title,
-        xmlUrl=feed.feed,
-        htmlUrl=feed.url,
-    )
+    ET.SubElement(doc, "outline", type="rss", text=feed.title, title=feed.title, xmlUrl=feed.feed, htmlUrl=feed.url)
     return doc
 
 
@@ -81,7 +73,7 @@ def save(root):
 if __name__ == "__main__":
     root, doc = create_template()
 
-    with open("/home/jarek/Documents/rss.txt") as f:
+    with open("rss.txt") as f:
         for rss in f:
             rss = rss.split().pop()
             LOGGER.info(f"Next website: {rss}")

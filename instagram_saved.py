@@ -8,17 +8,8 @@ from tqdm import tqdm
 
 class InstagramAPI(InstaAPI):
     def unsave(self, mediaId):
-        data = json.dumps(
-            {
-                "_uuid": self.uuid,
-                "_uid": self.username_id,
-                "_csrftoken": self.token,
-                "media_id": mediaId,
-            }
-        )
-        return self.SendRequest(
-            "media/" + str(mediaId) + "/unsave/", self.generateSignature(data)
-        )
+        data = json.dumps({"_uuid": self.uuid, "_uid": self.username_id, "_csrftoken": self.token, "media_id": mediaId})
+        return self.SendRequest("media/" + str(mediaId) + "/unsave/", self.generateSignature(data))
 
 
 def log_in(username, password):
@@ -51,12 +42,7 @@ def download_saved_media(api, unsave=True, folder_name="output"):
         def download_media(media_json):
             media_id = media_json.get("id")
             url = media_json.get("image_versions2").get("candidates")[0].get("url")
-            urllib.request.urlretrieve(
-                url,
-                os.path.join(
-                    "output", username, "{}_{}.jpg".format(username, media_id)
-                ),
-            )
+            urllib.request.urlretrieve(url, os.path.join("output", username, "{}_{}.jpg".format(username, media_id)))
 
         image = m_info.get("image_versions2")
 

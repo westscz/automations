@@ -7,10 +7,10 @@ class Register:
         return "{}({})".format(self.name, self.value)
 
 
-eax = Register('eax')
-ebx = Register('ebx')
-ecx = Register('ecx')
-edx = Register('edx')
+eax = Register("eax")
+ebx = Register("ebx")
+ecx = Register("ecx")
+edx = Register("edx")
 
 
 WRITE = 4
@@ -32,17 +32,19 @@ def INT(call):
     if call != 0x80:
         return
     if eax.value == 3 and ebx.value == 1:
-        print(str(ecx.value)[:edx.value])
+        print(str(ecx.value)[: edx.value])
 
 
-if __name__ == '__main__':
-    script = ["MOV(5, ecx)",
-              "MOV(6, edx)",
-              "ADD(edx, ecx)",
-              "MOV(READ, eax)",
-              "MOV(STDOUT, ebx)",
-              "MOV(2, edx)",
-              "INT(SYSCALL32)"]
+if __name__ == "__main__":
+    script = [
+        "MOV(5, ecx)",
+        "MOV(6, edx)",
+        "ADD(edx, ecx)",
+        "MOV(READ, eax)",
+        "MOV(STDOUT, ebx)",
+        "MOV(2, edx)",
+        "INT(SYSCALL32)",
+    ]
 
     for line in script:
         eval(line)

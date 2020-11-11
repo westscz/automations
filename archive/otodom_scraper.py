@@ -2,8 +2,9 @@
 Get data from Otodom.pl
 """
 
+
 class UrlCreator:
-    delimiter="&"
+    delimiter = "&"
     search = "search%5B"
     url = "https://www.otodom.pl/sprzedaz/mieszkanie/wroclaw/?"
 
@@ -39,8 +40,9 @@ class UrlCreator:
         print(self.url)
         return self.url
 
+
 x = UrlCreator()
-x.rooms_num([1,2,4])
+x.rooms_num([1, 2, 4])
 x.measure_from("50")
 x.measure_to("70")
 
@@ -49,10 +51,12 @@ x.price_to("250000")
 y = x.print_url()
 
 import requests
+
 x = requests.get(y)
 # print(x.text)
 from lxml import html
 import xml.etree.ElementTree as ET
+
 tree = html.fromstring(x.text)
 l = tree.xpath("//div[@class='offer-item-details']//li [@class='offer-item-price']")
 print(l[0].text)
