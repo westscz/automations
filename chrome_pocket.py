@@ -1,7 +1,12 @@
 # TODO: Check how and then get value from ENV / CONFIG / CLI
+# v0.1.0 Original creation
+# v0.2.0 Moved netscape dep to other file
+# v0.3.0 Switched off google chrome dep
+# v0.3.1 Do not include duplicates
 
 import json
 import os
+import pdb
 import subprocess
 
 from pocket import Pocket, PocketException
@@ -89,6 +94,7 @@ def archive_posts(pocket, articles):
 
 if __name__ == "__main__":
     articles_number = 500
+    articles_set = set()
     p = get_pocket_client()
     articles_list = get_last_articles(p, articles_number)
     bd = get_bookmarks_data(articles_list)
@@ -96,7 +102,7 @@ if __name__ == "__main__":
 #    add_data_to_chrome(pd)
 
     articles = list(articles_list.values())
-    articles.sort(key=lambda e:e.get("resolved_url"))
+    articles.sort(key=lambda e:e.get("given_url", ""))
 
     now = datetime.now()
     folder_name = f"AUTO[{now.month:02d}:{now.day:02d}]"
@@ -104,7 +110,14 @@ if __name__ == "__main__":
     root = create_root()
     folder = create_folder(root, folder_name)
     for article in articles:
-        add_link(folder, article.get("resolved_title"), article.get("resolved_url"))
-    create_file(root)
+        # if article.get("resolved_url") is None:
+        #     import pdb;pdb.set_trace()
+        title, url = article.get("given_title"), article.get("given_url")
+        if url not in articles_set:
+            add_link(folder, title, url)
+            articles_set.add(url)
+        else:
+            print(f"Duplicate: {url}")
 
+    create_file(root)
     archive_posts(p, articles_list)

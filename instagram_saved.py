@@ -1,9 +1,10 @@
 from InstagramAPI import InstagramAPI as InstaAPI
-import urllib.request
+from urllib.request import urlretrieve
 import json
 import fire
 import os
 from tqdm import tqdm
+from time import sleep
 
 
 class InstagramAPI(InstaAPI):
@@ -27,12 +28,13 @@ def create_directory(directory_path):
 
 def download_saved_media(api, unsave=True, folder_name="output"):
     create_directory(folder_name)
-
+    sleep(10)
     api.getSelfSavedMedia()
     saved_media = api.LastJson
     saved_media_list = saved_media["items"]
 
     for m in tqdm(saved_media_list):
+        print(m)
         m_info = m.get("media")
 
         m_id = m_info["id"]
@@ -42,7 +44,7 @@ def download_saved_media(api, unsave=True, folder_name="output"):
         def download_media(media_json):
             media_id = media_json.get("id")
             url = media_json.get("image_versions2").get("candidates")[0].get("url")
-            urllib.request.urlretrieve(url, os.path.join("output", username, "{}_{}.jpg".format(username, media_id)))
+            urlretrieve(url, os.path.join("output", username, "{}_{}.jpg".format(username, media_id)))
 
         image = m_info.get("image_versions2")
 
@@ -57,7 +59,7 @@ def download_saved_media(api, unsave=True, folder_name="output"):
 
 
 class InstagramCLI:
-    """ InstagramSaved is used to dowload all your saved data on instagram and cleanup saved section"""
+    """ InstagramCLI is used to dowload all your saved data on instagram and cleanup saved section"""
 
     def use_env(self):
         instagram_login = os.environ.get("INSTAGRAM_LOGIN", "")
@@ -68,7 +70,7 @@ class InstagramCLI:
             print(
                 "Set environment variables to use this:"
                 'export INSTAGRAM_LOGIN="login"'
-                'export INSTAGRAM_PASSWORD="pass"'
+                 'export INSTAGRAM_PASSWORD="pass"'
             )
 
     def run(self, instagram_login, instagram_password):
