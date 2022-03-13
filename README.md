@@ -1,4 +1,4 @@
-# AutomateBoringStuff
+# Automations
 
 Here is more detailed information about scripts I have written.
 I create these little programs as experiments to play with the language, or to solve problems for myself.
