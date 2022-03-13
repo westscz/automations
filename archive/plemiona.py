@@ -1,3 +1,7 @@
+"""
+Simple webbot to check few things in `plemiona` game
+"""
+
 from webbot import Browser
 import os
 
@@ -17,7 +21,9 @@ web.click("NEXT", tag="span")
 web.click("Świat 130")
 web.click("Ratusz")
 
-web.go_to("https://pl{}.plemiona.pl/game.php?village={}&screen=main".format(world, village))
+web.go_to(
+    "https://pl{}.plemiona.pl/game.php?village={}&screen=main".format(world, village)
+)
 
 source = web.get_page_source()
 from lxml import html

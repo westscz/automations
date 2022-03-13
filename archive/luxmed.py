@@ -13,7 +13,7 @@ def wait_for_and_click(browser, text):
 
 
 LUXMED_LOGIN = os.environ.get("LUXMED_LOGIN", "")
-LUXMED_PASS = "kafKa!23"  # os.environ.get("LUXMED_PASS", "")
+LUXMED_PASS = os.environ.get("LUXMED_PASS", "")
 
 w = webbot.Browser(showWindow=True)
 w.go_to("https://portalpacjenta.luxmed.pl/PatientPortal/Account/LogOn")

@@ -16,7 +16,9 @@ for src in glob.glob("/home/jarek/Desktop/photo/123_PANA/*.*"):
     with open(src, "rb") as f_jpg:
         tags = exifread.process_file(f_jpg, details=True)
         try:
-            datetime = str(tags["EXIF DateTimeOriginal"]).replace(":", "-").split(" ")[0]
+            datetime = (
+                str(tags["EXIF DateTimeOriginal"]).replace(":", "-").split(" ")[0]
+            )
             dst_directory: pathlib.Path = src.parent / datetime
             if not dst_directory.exists():
                 dst_directory.mkdir()

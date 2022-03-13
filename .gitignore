@@ -155,3 +155,5 @@ dmypy.json
 *.html
 .idea
 .vscode
+
+.env

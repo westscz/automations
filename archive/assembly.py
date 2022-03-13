@@ -1,3 +1,8 @@
+"""
+Trying to parse ASM code with python
+"""
+
+
 class Register:
     def __init__(self, name):
         self.value = None

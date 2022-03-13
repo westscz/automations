@@ -1,3 +1,7 @@
+"""
+Get all messages for given number from csv file (viber csv format) and create WordCloud
+"""
+
 import csv
 import pandas
 from wordcloud import WordCloud
@@ -21,7 +25,9 @@ def func_pandas_join(file):
                 yield last_row
 
     my_parser = parse_my_file(file)
-    return pandas.DataFrame(my_parser, columns=["date", "hour", "person", "number", "message"])
+    return pandas.DataFrame(
+        my_parser, columns=["date", "hour", "person", "number", "message"]
+    )
 
 
 def get_words_count(words_list):
@@ -31,9 +37,6 @@ def get_words_count(words_list):
 
 
 if __name__ == "__main__":
-    """
-    Get all messages for given number from csv file (viber csv format) and create WordCloud
-    """
     x = func_pandas_join("in.csv")
     y = x.query('number=="+48xxxxxxxxx"')["message"]
     w = get_words_count(y)  # x['message'])

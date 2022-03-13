@@ -6,10 +6,18 @@ import os
 
 
 def get_new_filename(filename):
-    result = re.search("\w*_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(\w*?)?\.(\w*)", filename)
+    result = re.search(
+        "\w*_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(\w*?)?\.(\w*)", filename
+    )
     if result:
         year, month, day, hour, minute, second, postfix, f = result.groups()
-        return "-".join([year, month, day]) + "_" + "-".join([hour, minute, second, postfix]) + "." + f
+        return (
+            "-".join([year, month, day])
+            + "_"
+            + "-".join([hour, minute, second, postfix])
+            + "."
+            + f
+        )
     else:
         return ""
 
@@ -24,6 +32,8 @@ if __name__ == "__main__":
         if new_file and not os.path.exists(os.path.join(directory, new_file)):
             import shutil
 
-            shutil.move(os.path.join(directory, file), os.path.join(directory, new_file))
+            shutil.move(
+                os.path.join(directory, file), os.path.join(directory, new_file)
+            )
         else:
             print(file, "+++++")

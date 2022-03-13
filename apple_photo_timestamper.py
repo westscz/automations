@@ -54,7 +54,11 @@ def change_files_names(directory_path):
         with open(path, "rb") as f_jpg:
             tags = exifread.process_file(f_jpg, details=True)
             try:
-                datetime = str(tags["EXIF DateTimeOriginal"]).replace(":", "-").replace(" ", "_")
+                datetime = (
+                    str(tags["EXIF DateTimeOriginal"])
+                    .replace(":", "-")
+                    .replace(" ", "_")
+                )
                 dst = path.parents[1] / "{}.jpg".format(datetime)
                 move_file(dst, path, "photo", datetime)
 
@@ -111,7 +115,13 @@ for apple_directory in glob.glob(hd + "/*"):
     change_files_names(apple_directory)
 
 print(moved_files)
-print("all files: ", moved_files["photo"] + moved_files["video"] + moved_files["image"] + moved_files["none"])
+print(
+    "all files: ",
+    moved_files["photo"]
+    + moved_files["video"]
+    + moved_files["image"]
+    + moved_files["none"],
+)
 
 
 with open(hd + "/apple.log", "w") as f:

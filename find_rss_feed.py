@@ -60,7 +60,15 @@ def create_template():
 
 
 def add_subelement(doc, feed):
-    ET.SubElement(doc, "outline", type="rss", text=feed.title, title=feed.title, xmlUrl=feed.feed, htmlUrl=feed.url)
+    ET.SubElement(
+        doc,
+        "outline",
+        type="rss",
+        text=feed.title,
+        title=feed.title,
+        xmlUrl=feed.feed,
+        htmlUrl=feed.url,
+    )
     return doc
 
 

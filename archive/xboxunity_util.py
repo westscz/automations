@@ -1,3 +1,6 @@
+"""
+Move directories with xboxunity ID to directory with game name
+"""
 import os
 import requests
 import shutil
@@ -21,7 +24,9 @@ def main():
     directories = [d for d in os.listdir(cwd) if os.path.isdir(d)]
     for d in directories:
         response = requests.get(
-            "http://xboxunity.net/Resources/Lib/TitleList.php?page=0&search={}&sort=3&category=0&filter=0".format(d)
+            "http://xboxunity.net/Resources/Lib/TitleList.php?page=0&search={}&sort=3&category=0&filter=0".format(
+                d
+            )
         )
         if response.status_code == 200:
             dictionary = response.json()

@@ -23,7 +23,7 @@ def add_parser(cls):
 @dataclass
 @add_parser
 class DeviantartSource:
-    name = 'deviantart'
+    name = "deviantart"
     album_name = HTMLAttr("//meta[@property='og:site_name']", "content")
     data_source = HTMLAttr("//img[@class='dev-content-full ']", "src")
     img_name = HTMLAttr("//img[@class='dev-content-full ']", "alt")

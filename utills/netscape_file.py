@@ -41,12 +41,17 @@ class NetscapeFileUrl:
             if self._is_searched_folder(bookmark, folder_name):
                 return bookmark.get("children")
             elif self._is_folder(bookmark):
-                result = self.__find_folder_in_bookmarks(folder_name, bookmark.get("children"))
+                result = self.__find_folder_in_bookmarks(
+                    folder_name, bookmark.get("children")
+                )
                 if result:
                     return result
 
     def _is_searched_folder(self, bookmark, folder_name):
-        return self._is_folder(bookmark) and bookmark.get(self.url_title_name, None) == folder_name
+        return (
+            self._is_folder(bookmark)
+            and bookmark.get(self.url_title_name, None) == folder_name
+        )
 
     def _is_folder(self, bookmark):
         return bookmark.get("type") == "folder"

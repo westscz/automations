@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 from netscape import create_root, create_folder, create_file, add_link
 
+
 def get_from_env(env_variable):
     return os.getenv(env_variable)
 
@@ -39,7 +40,9 @@ def get_last_articles(pocket: Pocket, count: int = 50):
 def get_bookmarks_data(pocket_list):
     bookmarks_data = []
     for value in tqdm(pocket_list.values()):
-        init = dict(type="url", name=value.get("resolved_title"), url=value.get("resolved_url"))
+        init = dict(
+            type="url", name=value.get("resolved_title"), url=value.get("resolved_url")
+        )
         if not init.get("url"):
             init["url"] = value.get("given_url")
         bookmarks_data.append(init)
@@ -61,7 +64,9 @@ def add_data_to_chrome(data_to_add):
     data = get_data_from_chrome(path)
     bookmarks_bar = data.get("roots").get("bookmark_bar").get("children")
     bookmarks_bar.append(data_to_add)
-    with open("dump.html", "w") as fp:  # TODO Dump to file for situation when something goes wrong with chrome
+    with open(
+        "dump.html", "w"
+    ) as fp:  # TODO Dump to file for situation when something goes wrong with chrome
         json.dump(data_to_add, fp)
     save_bookmarks_to_file(path, data)
 
@@ -76,7 +81,9 @@ def get_chrome_path(user="Default"):
     output = subprocess.check_output(["which", "chromium"]).decode("utf-8")
     env_home_path = os.getenv("HOME")
     if "snap" in output:
-        return f"{env_home_path}/snap/chromium/current/.config/chromium/{user}/Bookmarks"
+        return (
+            f"{env_home_path}/snap/chromium/current/.config/chromium/{user}/Bookmarks"
+        )
     else:
         return f"{env_home_path}/.config/chromium/{user}/Bookmarks"
 
@@ -99,10 +106,10 @@ if __name__ == "__main__":
     articles_list = get_last_articles(p, articles_number)
     bd = get_bookmarks_data(articles_list)
     pd = prepare_data(bd)
-#    add_data_to_chrome(pd)
+    #    add_data_to_chrome(pd)
 
     articles = list(articles_list.values())
-    articles.sort(key=lambda e:e.get("given_url", ""))
+    articles.sort(key=lambda e: e.get("given_url", ""))
 
     now = datetime.now()
     folder_name = f"AUTO[{now.month:02d}:{now.day:02d}]"
