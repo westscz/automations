@@ -157,3 +157,4 @@ dmypy.json
 .vscode
 
 .env
+output/
