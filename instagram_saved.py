@@ -1,11 +1,13 @@
 from InstagramAPI import InstagramAPI as InstaAPI
 from urllib.request import urlretrieve
+import requests
 import json
 import fire
 import os
 from tqdm import tqdm
 from time import sleep
 
+from pathlib import Path
 
 class InstagramAPI(InstaAPI):
     def unsave(self, mediaId):
@@ -42,7 +44,7 @@ def download_saved_media(api, unsave=True, folder_name="output"):
     saved_media = api.LastJson
     saved_media_list = saved_media["items"]
 
-    for m in tqdm(saved_media_list):
+    for m in saved_media_list:
         print(m)
         m_info = m.get("media")
 
@@ -53,12 +55,14 @@ def download_saved_media(api, unsave=True, folder_name="output"):
         def download_media(media_json):
             media_id = media_json.get("id")
             url = media_json.get("image_versions2").get("candidates")[0].get("url")
-            urlretrieve(
-                url,
-                os.path.join(
+            path = os.path.join(
                     "output", username, "{}_{}.jpg".format(username, media_id)
-                ),
-            )
+                )
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                with open(path, 'wb') as f:
+                    for chunk in r:
+                        f.write(chunk)
 
         image = m_info.get("image_versions2")
 
@@ -95,6 +99,43 @@ class InstagramCLI:
         available = True
         while available:
             available = download_saved_media(api)
+
+    def dump(self, instagram_login, instagram_password, user):
+        api = log_in(instagram_login, instagram_password)
+        id = 0
+        api.getUserFeed(id)
+        m_info = api.LastJson
+
+        def download_media(media_json):
+            media_id = media_json.get("id")
+            url = media_json.get("image_versions2").get("candidates")[0].get("url")
+            path = os.path.join(
+                    "output", user, "{}_{}.jpg".format(user, media_id)
+                )
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                with open(path, 'wb') as f:
+                    for chunk in r:
+                        f.write(chunk)
+
+        for item in m_info['items']:
+
+            image = item.get("image_versions2")
+
+            if image:
+                print('one')
+                download_media(item)
+            else:
+                for i in item.get("carousel_media"):
+                    print(i)
+                    download_media(i)
+
+        if m_info['more_available']:
+            next_max_id = m_info['next_max_id']
+
+        # x = api.getProfileData(user)
+
+        import pdb;pdb.set_trace()
 
 
 if __name__ == "__main__":
