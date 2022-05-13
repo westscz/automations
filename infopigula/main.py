@@ -74,9 +74,12 @@ def get_news(group_target, access_token, csrf_token):
         "show_last_release": "1",
     }
 
-    response = requests.get(url, headers=headers, params=payload).json()
+    response = requests.get(url, headers=headers, params=payload)
+    if not response.ok:
+        return []
 
-    return (news["field_news_content"] for news in response["rows"])
+    data = response.json()["rows"]
+    return (news["field_news_content"] for news in data)
 
 
 def split_msg(msg):
@@ -141,6 +144,8 @@ async def my_background_task():
         for target in GroupTarget:
             content = get_news(target.value, access_token, csrf_token)
             content = list(content)
+            if not content:
+                continue
             first_msg = content[0]
             if target.name not in last_msgs or last_msgs[target.name] != first_msg:
                 last_msgs[target.name] = first_msg
