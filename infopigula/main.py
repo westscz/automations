@@ -67,19 +67,23 @@ def get_news(group_target, access_token, csrf_token):
         "X-CSRF-Token": csrf_token,
         "Authorization": f"Bearer {access_token}",
     }
-    payload = {
-        "_format": "json",
-        "group_target_id": group_target,
-        "page": "0",
-        "show_last_release": "1",
-    }
-
-    response = requests.get(url, headers=headers, params=payload)
-    if not response.ok:
-        return []
-
-    data = response.json()["rows"]
-    return (news["field_news_content"] for news in data)
+    result = []
+    page = 0
+    while True:
+        payload = {
+            "_format": "json",
+            "group_target_id": group_target,
+            "page": page,
+            "show_last_release": "1",
+        }
+        response = requests.get(url, headers=headers, params=payload)
+        if not response.ok:
+            return result
+        data = response.json()["rows"]
+        if not data:
+            return result
+        result.extend((news["field_news_content"] for news in data))
+        page += 1
 
 
 def split_msg(msg):
