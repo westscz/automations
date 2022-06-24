@@ -74,7 +74,7 @@ def add_subelement(doc, feed):
 
 def save(root):
     tree = ET.ElementTree(root)
-    output_file = os.path.join(OUTPUT_DIRECTORY, "opml.xml")
+    output_file = "opml.xml"
     tree.write(output_file)
 
 
