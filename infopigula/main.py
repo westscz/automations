@@ -129,38 +129,42 @@ async def on_ready():
 async def my_background_task():
     await client.wait_until_ready()
     while not client.is_closed():
-        for guild in client.guilds:
-            if guild.name == DISCORD_GUILD:
-                break
+        try:
+            for guild in client.guilds:
+                if guild.name == DISCORD_GUILD:
+                    break
 
-        for channel in guild.channels:
-            if channel.id == int(DISCORD_CHANNEL):
-                break
+            for channel in guild.channels:
+                if channel.id == int(DISCORD_CHANNEL):
+                    break
 
-        if Path("save.p").exists():
-            with open("save.p", "rb") as f:
-                last_msgs = pickle.load(f)
-        else:
-            last_msgs = dict()
-
-        access_token, csrf_token = get_authorization()
-
-        for target in GroupTarget:
-            content = get_news(target.value, access_token, csrf_token)
-            content = list(content)
-            if not content:
-                continue
-            first_msg = content[0]
-            if target.name not in last_msgs or last_msgs[target.name] != first_msg:
-                last_msgs[target.name] = first_msg
-                await send_section_msgs(channel, target.name, content)
+            if Path("save.p").exists():
+                with open("save.p", "rb") as f:
+                    last_msgs = pickle.load(f)
             else:
-                print(f"No update in {target.name}")
+                last_msgs = dict()
 
-        with open("save.p", "wb") as f:
-            pickle.dump(last_msgs, f)
+            access_token, csrf_token = get_authorization()
 
-        await asyncio.sleep(600)
+            for target in GroupTarget:
+                content = get_news(target.value, access_token, csrf_token)
+                content = list(content)
+                if not content:
+                    continue
+                first_msg = content[0]
+                if target.name not in last_msgs or last_msgs[target.name] != first_msg:
+                    last_msgs[target.name] = first_msg
+                    await send_section_msgs(channel, target.name, content)
+                else:
+                    print(f"No update in {target.name}")
+
+            with open("save.p", "wb") as f:
+                pickle.dump(last_msgs, f)
+        except Exception as e:
+            send_section_msgs(channel, 'failure', ["something broke"])
+        finally:
+            await asyncio.sleep(600)
+
 
 
 if __name__ == "__main__":
