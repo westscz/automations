@@ -64,6 +64,18 @@ def download_saved_media(api, unsave=True, folder_name="output"):
                     for chunk in r:
                         f.write(chunk)
 
+        def download_video(media_json):
+            media_id = media_json.get("id")
+            url = m_info.get('video_versions')[0]['url']
+            path = os.path.join(
+                    "output", username, "{}_{}.mp4".format(username, media_id)
+                )
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                with open(path, 'wb') as f:
+                    for chunk in r:
+                        f.write(chunk)
+
         image = m_info.get("image_versions2")
 
         if image:
@@ -71,8 +83,14 @@ def download_saved_media(api, unsave=True, folder_name="output"):
         else:
             for i in m_info.get("carousel_media"):
                 download_media(i)
+
+        video = m_info.get('video_versions')
+        if video:
+            download_video(m_info)
+
         if unsave:
             api.unsave(m_id)
+
     return saved_media["more_available"]
 
 
