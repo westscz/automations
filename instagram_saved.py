@@ -1,107 +1,114 @@
-from InstagramAPI import InstagramAPI as InstaAPI
-from urllib.request import urlretrieve
+from instagrapi import Client
 import requests
-import json
 import fire
-import os
-from tqdm import tqdm
-from time import sleep
 
 from pathlib import Path
 
-class InstagramAPI(InstaAPI):
-    def unsave(self, mediaId):
-        data = json.dumps(
-            {
-                "_uuid": self.uuid,
-                "_uid": self.username_id,
-                "_csrftoken": self.token,
-                "media_id": mediaId,
-            }
-        )
-        return self.SendRequest(
-            "media/" + str(mediaId) + "/unsave/", self.generateSignature(data)
-        )
-
 
 def log_in(username, password):
-    api = InstagramAPI(username, password)
-    api.login()
-    return api
-
-
-def create_directory(directory_path):
+    client = Client()
+    client.delay_range = [1, 3]
+    file = username+"_session.json"
     try:
-        os.stat(directory_path)
-    except:
-        os.mkdir(directory_path)
+        session = client.load_settings(file)
+    except FileNotFoundError:
+        session = None
+    if session:
+        try:
+            client.set_settings(session)
+            client.login(username, password)
+            client.get_timeline_feed()
+        except Exception:
+            old_session = client.get_settings()
+            client.set_settings({})
+            client.set_uuids(old_session["uuids"])
+            client.login(username, password)
+            client.dump_settings(file)
+    else:
+        client.login(username, password)
+        client.dump_settings(file)
+    return client
+
+
+def download_media(post, filepath):
+    if post.image_versions2:
+        url = post.image_versions2["candidates"][0]["url"]
+    else:
+        url = post.thumbnail_url
+    path = filepath.with_suffix('.jpg')
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open(path, 'wb') as f:
+            for chunk in r:
+                f.write(chunk)
+
+def download_video(post, filepath):
+    url = post.video_url
+    path = filepath.with_suffix('.mp4')
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open(path, 'wb') as f:
+            for chunk in r:
+                f.write(chunk)
+
+def download_description(post, filepath):
+    path = filepath.with_suffix('.txt')
+    with open(path, 'w') as f:
+        f.write(post.caption_text)
+
+
+def download_post_media(api, post, root_dir):
+    username = post.user.username
+    filename = f"{username.replace('.', '')}_{post.code}_{post.id}"
+    (root_dir/username).mkdir(parents=True, exist_ok=True)
+    filepath = root_dir/username/filename
+    print(filename)
+
+    if post.image_versions2:
+        download_media(post, filepath)
+    elif post.resources:
+        for i, resource in enumerate(post.resources):
+            filepath = root_dir/username/(filename+str(i))
+            download_media(api.media_info(resource.pk), filepath)
+    elif post.video_url:
+        download_video(post, filepath)
+    else:
+        raise Exception("Unexpected type", post.product_type, filepath)
+    download_description(post, filepath)
+
+
+def unsave_media(api, post, collection):
+    collection_pk = api.collection_pk_by_name(collection.name)
+    if collection_pk == 'ALL_MEDIA_AUTO_COLLECTION':
+        collection_pk = 0
+    api.media_unsave(post.id, collection_pk)
+
+
+def collection_medias_by_name(api, name):
+    try:
+        return api.collection_medias_by_name(name)
+    except Exception: #CollectionNotFound
+        return []
 
 
 def download_saved_media(api, unsave=True, folder_name="output"):
-    create_directory(folder_name)
-    sleep(10)
-    api.getSelfSavedMedia()
-    saved_media = api.LastJson
-    saved_media_list = saved_media["items"]
-
-    for m in saved_media_list:
-        media = m.get("media")
-        print(media['user']['username'], media['code'])
-
-        m_id = media["id"]
-        username = media.get("user").get("username")
-        create_directory(os.path.join(folder_name, username))
-
-        def download_media(media_json):
-            media_id = media_json.get("id")
-            url = media_json.get("image_versions2").get("candidates")[0].get("url")
-            path = os.path.join(
-                    "output", username, "{}_{}.jpg".format(username, media_id)
-                )
-            r = requests.get(url, stream=True)
-            if r.status_code == 200:
-                with open(path, 'wb') as f:
-                    for chunk in r:
-                        f.write(chunk)
-
-        def download_video(media_json):
-            media_id = media_json.get("id")
-            url = media.get('video_versions')[0]['url']
-            path = os.path.join(
-                    "output", username, "{}_{}.mp4".format(username, media_id)
-                )
-            r = requests.get(url, stream=True)
-            if r.status_code == 200:
-                with open(path, 'wb') as f:
-                    for chunk in r:
-                        f.write(chunk)
-
-        image = media.get("image_versions2")
-
-        if image:
-            download_media(media)
-        else:
-            for i in media.get("carousel_media"):
-                download_media(i)
-
-        video = media.get('video_versions')
-        if video:
-            download_video(media)
-
-        if unsave:
-            api.unsave(m_id)
-
-    return saved_media["more_available"]
+    root_dir = Path(folder_name)
+    for collection in api.collections():
+        while posts := collection_medias_by_name(api, collection.name):
+            for post in posts:
+                download_post_media(api, post, root_dir)
+                if unsave:
+                    unsave_media(api, post, collection)
 
 
 class InstagramCLI:
     """ InstagramCLI is used to dowload all your saved data on instagram and cleanup saved section"""
 
     def use_env(self):
-        instagram_login = os.environ.get("INSTAGRAM_LOGIN", "")
-        instagram_password = os.environ.get("INSTAGRAM_PASSWORD", "")
+        instagram_login = "niepaczenawet" #os.environ.get("INSTAGRAM_LOGIN", "niepaczenawet")
+        instagram_password = "$#oh#sST4mAn6J" #os.environ.get("INSTAGRAM_PASSWORD", "$#oh#sST4mAn6J")
         if instagram_login and instagram_password:
-            self._run(instagram_login, instagram_password)
+            self.run(instagram_login, instagram_password)
         else:
             print(
                 "Set environment variables to use this:"
@@ -110,53 +117,15 @@ class InstagramCLI:
             )
 
     def run(self, instagram_login, instagram_password):
-        self._run(instagram_login, instagram_password)
-
-    def _run(self, instagram_login, instagram_password):
         api = log_in(instagram_login, instagram_password)
         available = True
         while available:
-            available = download_saved_media(api)
+            available = download_saved_media(api, folder_name=instagram_login)
 
     def dump(self, instagram_login, instagram_password, user):
         api = log_in(instagram_login, instagram_password)
-        id = 0
-        api.getUserFeed(id)
-        m_info = api.LastJson
-
-        def download_media(media_json):
-            media_id = media_json.get("id")
-            url = media_json.get("image_versions2").get("candidates")[0].get("url")
-            path = os.path.join(
-                    "output", user, "{}_{}.jpg".format(user, media_id)
-                )
-            r = requests.get(url, stream=True)
-            if r.status_code == 200:
-                with open(path, 'wb') as f:
-                    for chunk in r:
-                        f.write(chunk)
-
-        for item in m_info['items']:
-
-            image = item.get("image_versions2")
-
-            if image:
-                print('one')
-                download_media(item)
-            else:
-                for i in item.get("carousel_media"):
-                    print(i)
-                    download_media(i)
-
-        if m_info['more_available']:
-            next_max_id = m_info['next_max_id']
-
-        # x = api.getProfileData(user)
-
-        import pdb;pdb.set_trace()
+        raise NotImplemented("Function is not available")
 
 
 if __name__ == "__main__":
     fire.Fire(InstagramCLI, name="InstagramSaved")
-
-# TODO: Error 429 calm down for a minute man!

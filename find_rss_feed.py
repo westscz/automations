@@ -23,6 +23,7 @@ feed_postfix_list = [
     "/rss",
     "/posts/rss.xml",
     "feeds/all_rss.xml",
+    "/index.xml"
 ]
 
 LOGGER = create_logger(__name__)
@@ -41,6 +42,7 @@ def get_feed(url):
     for feed_postfix in feed_postfix_list:
         rc = requests.get(url + feed_postfix).status_code
         if rc == 200:
+            LOGGER.warning(f"{url}, {feed_postfix}")
             return FeedTuple(title, url, url + feed_postfix)
 
     rss = tree.xpath("//*[@type='application/rss+xml']")
